@@ -47,7 +47,7 @@ app.get('/todos/:id', function (req, res) {
 // POST /todos
 app.post('/todos', function (req, res) {
 
-	// refactored with underscore
+	// post validation refactored with underscore
 	var body = _.pick(req.body, 'description', 'completed');
 
 	// validate a bad request
@@ -57,7 +57,7 @@ app.post('/todos', function (req, res) {
 
 	body.description = body.description.trim();
 	body.id = todoNextId++;
-	// refactored with underscore pick above
+	// refactored with underscore (pick method) above
 	/*var todo = {
 		 id : todoNextId
 		, description: body.description
@@ -82,23 +82,38 @@ app.delete('/todos/:id', function (req, res) {
 	}
 });
 
+// PUT /todos/:id
+app.put('/todos/:id', function (req, res) {
+
+	var body = _.pick(req.body, 'description', 'completed');
+	var validAttributes = {};
+	var todoId = parseInt(req.params.id, 10);
+	var matchedTodo = _.findWhere(todos, {id: todoId});
+
+	if(!matchedTodo) {
+		return res.status(404).json({"error" : "no todo found for that id"});
+	}
+
+	// Validate the values of both the fields
+	if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
+		validAttributes.description = body.description;
+	} else if (body.hasOwnProperty('description')) {
+		// body has description but value is not valid
+		return res.status(400).send();
+	}
+
+	if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
+		validAttributes.completed = body.completed;
+	} else if (body.hasOwnProperty('completed')) {
+		// body has completed but value is not valid
+		return res.status(400).send();
+	}
+
+	_.extend(matchedTodo, validAttributes);
+	res.json(matchedTodo);
+
+});
+
 app.listen(PORT, function() {
 	console.log('Express listening on port ' + PORT);
 });
-
-
-/*	{
-		id: 1
-		, description: 'Meet a friend for lunch today'
-		, completed: false
-	},
-	{
-		id: 2
-		, description: 'Go for shopping today'
-		, completed: false
-	},
-	{
-		id: 3
-		, description: 'Call a friend today'
-		, completed: true
-	}*/
