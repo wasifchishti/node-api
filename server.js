@@ -56,6 +56,7 @@ app.post('/todos', function(req, res) {
 	}
 
 	body.description = body.description.trim();
+	body.id = todoNextId++;
 	// refactored with underscore pick above
 	/*var todo = {
 		 id : todoNextId
@@ -64,9 +65,8 @@ app.post('/todos', function(req, res) {
 	};*/
 
 	todos.push(body);
-	todoNextId++;
 
-	res.status(200).send('Todo successfully added');
+	res.json(body);
 });
 
 
