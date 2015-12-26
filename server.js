@@ -10,19 +10,19 @@ var todoNextId = 1;
 // Body parser middleware
 app.use(bodyParser.json());
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
 	res.send('Todo API root');
 });
 
 
 // GET /todos
-app.get('/todos', function(req, res) {
+app.get('/todos', function (req, res) {
 	res.json(todos);
 });
 
 
 // GET /todos/:id
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id', function (req, res) {
 
 	// convert the param to int from default string type
 	var todoId = parseInt(req.params.id, 10);
@@ -45,7 +45,7 @@ app.get('/todos/:id', function(req, res) {
 });
 
 // POST /todos
-app.post('/todos', function(req, res) {
+app.post('/todos', function (req, res) {
 
 	// refactored with underscore
 	var body = _.pick(req.body, 'description', 'completed');
@@ -69,6 +69,18 @@ app.post('/todos', function(req, res) {
 	res.json(body);
 });
 
+// DELETE /todos/:id
+app.delete('/todos/:id', function (req, res) {
+	var todoId = parseInt(req.params.id, 10);
+	var matchedTodo = _.findWhere(todos, {id: todoId});
+
+	if(!matchedTodo) {
+		res.status(404).json({"error" : "no todo found for that id"});
+	} else {
+		todos =	_.without(todos, matchedTodo);
+		res.json(matchedTodo);
+	}
+});
 
 app.listen(PORT, function() {
 	console.log('Express listening on port ' + PORT);
