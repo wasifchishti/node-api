@@ -48,15 +48,14 @@ app.get('/todos/:id', function(req, res) {
 app.post('/todos', function(req, res) {
 
 	// refactored with underscore
-	var todo = _.pick(req.body, 'description', 'completed');
+	var body = _.pick(req.body, 'description', 'completed');
 
 	// validate a bad request
 	if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
 		res.status(400).send();
 	}
 
-	todo.description = todo.description.trim();
-
+	body.description = body.description.trim();
 	// refactored with underscore pick above
 	/*var todo = {
 		 id : todoNextId
@@ -64,7 +63,7 @@ app.post('/todos', function(req, res) {
 		, completed: body.completed
 	};*/
 
-	todos.push(todo);
+	todos.push(body);
 	todoNextId++;
 
 	res.status(200).send('Todo successfully added');
