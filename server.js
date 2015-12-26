@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var _ = require('underscore');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -13,45 +14,27 @@ app.get('/', function(req, res) {
 	res.send('Todo API root');
 });
 
+
 // GET /todos
 app.get('/todos', function(req, res) {
 	res.json(todos);
 });
 
-// POST /todos
-
-app.post('/todos', function(req, res) {
-
-	var body = req.body;
-/*	console.log('description: ' + body.description);
-
-	res.json(body);*/
-
-	var todo = {
-		 id : todoNextId
-		, description: body.description
-		, completed: body.completed
-	};
-
-	todos.push(todo);
-	todoNextId++;
-
-	res.status(200).send('Todo successfully added');
-});
 
 // GET /todos/:id
 app.get('/todos/:id', function(req, res) {
 
 	// convert the param to int from default string type
 	var todoId = parseInt(req.params.id, 10);
-	var matchedTodo;
+	var matchedTodo = _.findWhere(todos, {id: todoId});
 
 	// Iterate over todos array. Find the match
-	todos.forEach(function (todo) {
+	// Below code is Refactored above with underscore in one line
+/*	todos.forEach(function (todo) {
 		if(todo.id === todoId) {
 			matchedTodo = todo;
 		}
-	});
+	});*/
 
 	if(matchedTodo) {
 		res.json(matchedTodo);
@@ -59,9 +42,33 @@ app.get('/todos/:id', function(req, res) {
 	else {
 		res.status(404).send();
 	}
-
 });
 
+// POST /todos
+app.post('/todos', function(req, res) {
+
+	// refactored with underscore
+	var todo = _.pick(req.body, 'description', 'completed');
+
+	// validate a bad request
+	if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+		res.status(400).send();
+	}
+
+	todo.description = todo.description.trim();
+
+	// refactored with underscore pick above
+	/*var todo = {
+		 id : todoNextId
+		, description: body.description
+		, completed: body.completed
+	};*/
+
+	todos.push(todo);
+	todoNextId++;
+
+	res.status(200).send('Todo successfully added');
+});
 
 
 app.listen(PORT, function() {
