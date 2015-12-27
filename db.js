@@ -1,8 +1,20 @@
 var Sequelize = require('sequelize');
-var sequelize = new Sequelize(undefined, undefined, undefined, {
-	'dialect': 'sqlite',
-	'storage': __dirname + '/data/dev-todo-api.sqlite'
-});
+
+// get ENV variable from Heroku
+var env = process.env.NODE_ENV || 'development';
+var sequelize;
+
+// if running on Heroku production env use Postgres
+if(env === 'production') {
+	sequelize = new Sequelize(process.env.DATABASE_URL, {
+		dialect: 'postgres'
+	});
+} else {
+	sequelize = new Sequelize(undefined, undefined, undefined, {
+		'dialect': 'sqlite',
+		'storage': __dirname + '/data/dev-todo-api.sqlite'
+	});
+}
 
 var db = {};
 
