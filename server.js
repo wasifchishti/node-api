@@ -45,26 +45,19 @@ app.get('/todos', function(req, res) {
 
 // GET /todos/:id
 app.get('/todos/:id', function(req, res) {
-
-	// convert the param to int from default string type
 	var todoId = parseInt(req.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {
-		id: todoId
+
+	db.todo.findById(todoId).then(function (todo) {
+		if (!!todo) {
+			res.json(todo.toJSON());
+		} else {
+			res.status(404).json({
+				"error": "no todo found for that id"
+			});
+		}
+	}, function (e) {
+		res.status(500).send();
 	});
-
-	// Iterate over todos array. Find the match
-	// Below code is Refactored above with underscore in one line
-	/*	todos.forEach(function (todo) {
-			if(todo.id === todoId) {
-				matchedTodo = todo;
-			}
-		});*/
-
-	if (matchedTodo) {
-		res.json(matchedTodo);
-	} else {
-		res.status(404).send();
-	}
 });
 
 // POST /todos
@@ -72,26 +65,11 @@ app.post('/todos', function(req, res) {
 
 	var body = _.pick(req.body, 'description', 'completed');
 
-	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-		res.status(400).send();
-	}
-
 	db.todo.create(body).then(function (todo) {
 		res.json(todo.toJSON());
 	}, function (e) {
 		res.status(400).json(e);
 	});
-
-/*	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-		res.status(400).send();
-	}
-
-	body.description = body.description.trim();
-	body.id = todoNextId++;
-
-	todos.push(body);
-
-	res.json(body);*/
 });
 
 // DELETE /todos/:id
