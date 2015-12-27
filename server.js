@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
+var db = require('./db.js');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -69,26 +70,28 @@ app.get('/todos/:id', function(req, res) {
 // POST /todos
 app.post('/todos', function(req, res) {
 
-	// post validation refactored with underscore
 	var body = _.pick(req.body, 'description', 'completed');
 
-	// validate a bad request
 	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+		res.status(400).send();
+	}
+
+	db.todo.create(body).then(function (todo) {
+		res.json(todo.toJSON());
+	}, function (e) {
+		res.status(400).json(e);
+	});
+
+/*	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
 		res.status(400).send();
 	}
 
 	body.description = body.description.trim();
 	body.id = todoNextId++;
-	// refactored with underscore (pick method) above
-	/*var todo = {
-		 id : todoNextId
-		, description: body.description
-		, completed: body.completed
-	};*/
 
 	todos.push(body);
 
-	res.json(body);
+	res.json(body);*/
 });
 
 // DELETE /todos/:id
@@ -144,6 +147,8 @@ app.put('/todos/:id', function(req, res) {
 
 });
 
-app.listen(PORT, function() {
-	console.log('Express listening on port ' + PORT);
+db.sequelize.sync().then(function () {
+	app.listen(PORT, function() {
+		console.log('Express listening on port ' + PORT);
+	});
 });

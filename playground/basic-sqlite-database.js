@@ -17,7 +17,7 @@ var Todo = sequelize.define('todo', {
 		allowNull: false,
 		defaultValue: false
 	}
-})
+});
 
 sequelize.sync({
 	//force: true
